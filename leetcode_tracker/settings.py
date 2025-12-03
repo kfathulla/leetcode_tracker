@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-z8qpv*jgk=*uxb=q9r5=@rc$=3q8-8xggzkplm#t#05m_4x*51
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["leetcode-tracker.metabio.uz"]
+ALLOWED_HOSTS = ["leetcode-tracker.metabio.uz", "127.0.0.1", "localhost"]
 
 
 # Application definition
