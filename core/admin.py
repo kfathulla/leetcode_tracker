@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Lesson, Problem, User, SolvedProblem
+from .models import Lesson, Problem, User, SolvedProblem, Group
 
 
 @admin.register(Lesson)
@@ -22,3 +22,8 @@ class UserAdmin(admin.ModelAdmin):
 class SolvedProblemAdmin(admin.ModelAdmin):
     list_display = ("user", "problem", "solved_at")
     list_filter = ("user", "problem")
+    
+    
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")

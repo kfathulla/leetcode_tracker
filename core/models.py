@@ -7,6 +7,11 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
+class Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Problem(models.Model):
     title = models.CharField(max_length=255)
@@ -22,6 +27,13 @@ class Problem(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=255)
     leet_code_username = models.CharField(max_length=255, unique=True)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users"
+    )
 
     def __str__(self):
         return self.name
