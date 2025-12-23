@@ -15,7 +15,7 @@ class Group(models.Model):
 
 class Problem(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
     lesson = models.ForeignKey(
         Lesson, on_delete=models.CASCADE, related_name="problems", null=True, blank=True
     )
