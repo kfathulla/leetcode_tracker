@@ -8,14 +8,29 @@ from django.db.models import Prefetch
 
 
 def refresh_leetcode(request):
-    # Only allow POST for safety
     if request.method == "POST":
+        # Run your update job
         update_all_users()
         messages.success(request, "LeetCode data updated successfully!")
-    else:
-        messages.error(request, "Invalid request method.")
-        
-    return redirect("matrix")
+
+        # Get filters from POST
+        group = request.POST.get("group", "")
+        lesson = request.POST.get("lesson", "")
+
+        # Redirect back to main page with same filters
+        params = []
+        if group:
+            params.append(f"group={group}")
+        if lesson:
+            params.append(f"lesson={lesson}")
+
+        url = "/"
+        if params:
+            url += "?" + "&".join(params)
+        return redirect(url)
+
+    messages.error(request, "Invalid request method.")
+    return redirect("/")
 
 def matrix_view(request):
     group_id = request.GET.get("group")
