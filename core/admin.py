@@ -9,7 +9,7 @@ class LessonAdmin(admin.ModelAdmin):
 
 @admin.register(Problem)
 class ProblemAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "slug", "lesson")
+    list_display = ("id", "title", "slug", "lesson", "order")
     list_filter = ("lesson",)
 
 
