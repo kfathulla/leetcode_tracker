@@ -15,7 +15,7 @@ def refresh_leetcode(request):
     else:
         messages.error(request, "Invalid request method.")
         
-    return redirect("")
+    return redirect("matrix")
 
 def matrix_view(request):
     group_id = request.GET.get("group")
