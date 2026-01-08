@@ -19,6 +19,8 @@ class Problem(models.Model):
     lesson = models.ForeignKey(
         Lesson, on_delete=models.CASCADE, related_name="problems", null=True, blank=True
     )
+    
+    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title

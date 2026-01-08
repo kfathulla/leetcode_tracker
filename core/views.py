@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Count, Q
 from .models import User, Problem, Lesson, SolvedProblem, Group
 
 
@@ -9,13 +10,19 @@ def matrix_view(request):
     group_id = request.GET.get("group")
     lesson_id = request.GET.get("lesson")
 
-    users = User.objects.all().order_by("name")
+    users = User.objects.all()
     if group_id:
         users = users.filter(group_id=group_id)
 
     lessons = Lesson.objects.prefetch_related("problems").order_by("title")
     if lesson_id:
         lessons = lessons.filter(id=lesson_id)
+
+    users = users.annotate(
+        solved_count=Count(
+            "solvedproblem", filter=Q(solvedproblem__problem__lesson__in=lessons)
+        )
+    ).order_by("-solved_count", "name")
 
     # Fetch all solved problems that have a lesson
     solved_qs = SolvedProblem.objects.filter(
@@ -29,7 +36,7 @@ def matrix_view(request):
     lesson_groups = {}
     for lesson in lessons:
         problems_list = []
-        for problem in lesson.problems.all().order_by("title"):
+        for problem in lesson.problems.all().order_by("order", "title"):
             # For each problem, compute solved status per user
             solved_status = [(user.id, problem.id) in solved_set for user in users]
             problems_list.append(
@@ -41,8 +48,8 @@ def matrix_view(request):
         lesson_groups[lesson.title] = problems_list
 
     return render(
-        request, 
-        "table.html", 
+        request,
+        "table.html",
         {
             "users": users,
             "lesson_groups": lesson_groups,
@@ -50,5 +57,5 @@ def matrix_view(request):
             "lessons": Lesson.objects.all(),
             "selected_group": group_id,
             "selected_lesson": lesson_id,
-        }
+        },
     )
