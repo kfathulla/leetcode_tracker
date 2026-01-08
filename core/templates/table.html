@@ -93,12 +93,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.filters form {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-}
-
 .filter-group {
     display: flex;
     flex-direction: column;
@@ -132,37 +126,101 @@
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-    </style>
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    height: 36px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    background-color: #3e8e41;
+    transform: translateY(0);
+}
+
+.filters form {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+    justify-content: space-between; /* <-- added: push refresh button to the right */
+    flex-wrap: wrap; /* optional: wrap on small screens */
+}
+
+.filters .filters-left {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.filters .filters-right {
+    display: flex;
+    align-items: center;
+}
+
+</style>
 </head>
 <body>
 <h2>LeetCode Solved Problem Matrix</h2>
 
 <div class="filters">
     <form method="get">
-        <div class="filter-group">
-            <label for="group">Group</label>
-            <select name="group" id="group" onchange="this.form.submit()">
-                <option value="">All groups</option>
-                {% for g in groups %}
-                    <option value="{{ g.id }}"
-                        {% if g.id|stringformat:"s" == selected_group %}selected{% endif %}>
-                        {{ g.name }}
-                    </option>
-                {% endfor %}
-            </select>
+        <div class="filters-left">
+            <div class="filter-group">
+                <label for="group">Group</label>
+                <select name="group" id="group" onchange="this.form.submit()">
+                    <option value="">All groups</option>
+                    {% for g in groups %}
+                        <option value="{{ g.id }}"
+                            {% if g.id|stringformat:"s" == selected_group %}selected{% endif %}>
+                            {{ g.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="lesson">Lesson</label>
+                <select name="lesson" id="lesson" onchange="this.form.submit()">
+                    <option value="">All lessons</option>
+                    {% for l in lessons %}
+                        <option value="{{ l.id }}"
+                            {% if l.id|stringformat:"s" == selected_lesson %}selected{% endif %}>
+                            {{ l.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <div class="filter-group">
-            <label for="lesson">Lesson</label>
-            <select name="lesson" id="lesson" onchange="this.form.submit()">
-                <option value="">All lessons</option>
-                {% for l in lessons %}
-                    <option value="{{ l.id }}"
-                        {% if l.id|stringformat:"s" == selected_lesson %}selected{% endif %}>
-                        {{ l.title }}
-                    </option>
-                {% endfor %}
-            </select>
+        <div class="filters-right">
+            <form action="{% url 'refresh_leetcode' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                
+                <button type="submit" class="btn btn-primary">
+                    <svg width="18px" height="18px" viewBox="-0.45 0 60.369 60.369" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Group_63" data-name="Group 63" transform="translate(-446.571 -211.615)">
+                        <path id="Path_54" data-name="Path 54" d="M504.547,265.443h-9.019a30.964,30.964,0,0,0-29.042-52.733,1.5,1.5,0,1,0,.792,2.894,27.955,27.955,0,0,1,25.512,48.253l0-10.169h-.011a1.493,1.493,0,0,0-2.985,0h0v13.255a1.5,1.5,0,0,0,1.5,1.5h13.256a1.5,1.5,0,1,0,0-3Z" fill="#fff" stroke="currentColor" stroke-width="4"/>
+                        <path id="Path_55" data-name="Path 55" d="M485.389,267.995a27.956,27.956,0,0,1-25.561-48.213l0,10.2h.015a1.491,1.491,0,0,0,2.978,0h.007V216.791a1.484,1.484,0,0,0-1.189-1.532l-.018-.005a1.533,1.533,0,0,0-.223-.022c-.024,0-.046-.007-.07-.007H448.071a1.5,1.5,0,0,0,0,3h8.995a30.963,30.963,0,0,0,29.115,52.664,1.5,1.5,0,0,0-.792-2.894Z" fill="#fff" stroke="currentColor" stroke-width="4"/>
+                    </g>
+                    </svg>
+                    
+                </button>
+            </form>
         </div>
     </form>
 </div>

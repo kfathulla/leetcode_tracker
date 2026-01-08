@@ -1,10 +1,21 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Count, Q
+from django.contrib import messages
 from .models import User, Problem, Lesson, SolvedProblem, Group
-
+from .scheduler import update_all_users
 
 from django.db.models import Prefetch
 
+
+def refresh_leetcode(request):
+    # Only allow POST for safety
+    if request.method == "POST":
+        update_all_users()
+        messages.success(request, "LeetCode data updated successfully!")
+    else:
+        messages.error(request, "Invalid request method.")
+        
+    return redirect("matrix")
 
 def matrix_view(request):
     group_id = request.GET.get("group")
