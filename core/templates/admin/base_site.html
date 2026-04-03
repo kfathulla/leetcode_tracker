@@ -1,0 +1,739 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | LC Tracker{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <span class="lc-brand">LC</span> Tracker
+    </a>
+</h1>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root, [data-theme="light"] {
+        --primary: #6366f1;
+        --primary-hover: #4f46e5;
+        --primary-5: rgba(99,102,241,0.05);
+        --primary-8: rgba(99,102,241,0.08);
+        --primary-12: rgba(99,102,241,0.12);
+        --accent-text: #6366f1;
+        --surface: #fff;
+        --surface-2: #f9fafb;
+        --bg: #f5f6f8;
+        --bg-sidebar: #fff;
+        --text: #111827;
+        --text-2: #374151;
+        --text-3: #6b7280;
+        --text-muted: #9ca3af;
+        --border: #e5e7eb;
+        --border-light: #f1f3f5;
+        --hover: rgba(0,0,0,0.02);
+        --pill-active-bg: #111827;
+        --pill-active-text: #fff;
+        --r: 10px; --rs: 8px; --rxs: 6px;
+        --shadow: 0 1px 3px rgba(0,0,0,0.04);
+        --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+        --green: #10b981; --green-bg: #ecfdf5;
+        --red: #ef4444; --red-bg: #fef2f2;
+        --yellow: #f59e0b; --yellow-bg: #fffbeb;
+        --blue: #3b82f6; --blue-bg: #eff6ff;
+        --sidebar-w: 220px;
+        color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+        --primary: #818cf8; --primary-hover: #6366f1;
+        --primary-5: rgba(129,140,248,0.05);
+        --primary-8: rgba(129,140,248,0.08);
+        --primary-12: rgba(129,140,248,0.12);
+        --accent-text: #a5b4fc;
+        --surface: #16181f; --surface-2: #1c1f28;
+        --bg: #0c0d12; --bg-sidebar: #12141a;
+        --text: #e5e7eb; --text-2: #d1d5db;
+        --text-3: #9ca3af; --text-muted: #6b7280;
+        --border: #262935; --border-light: #1f222c;
+        --hover: rgba(255,255,255,0.02);
+        --pill-active-bg: #e5e7eb; --pill-active-text: #111827;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+        --green: #34d399; --green-bg: rgba(16,185,129,0.1);
+        --red: #f87171; --red-bg: rgba(239,68,68,0.1);
+        --yellow: #fbbf24; --yellow-bg: rgba(245,158,11,0.1);
+        --blue: #60a5fa; --blue-bg: rgba(59,130,246,0.1);
+        color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        margin: 0 !important; padding: 0 !important;
+        -webkit-font-smoothing: antialiased;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Hide defaults ── */
+    #header { display: none !important; }
+    div.breadcrumbs { display: none !important; }
+
+    /* ── Layout ── */
+    #container { display: flex !important; min-height: 100vh !important; min-width: 0 !important; padding: 0 !important; margin: 0 !important; }
+
+    /* ── Sidebar ── */
+    .lc-sidebar {
+        width: var(--sidebar-w); min-width: var(--sidebar-w);
+        background: var(--bg-sidebar); border-right: 1px solid var(--border);
+        display: flex; flex-direction: column;
+        position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+        overflow-y: auto; transition: transform 0.2s;
+    }
+    .lc-sidebar-brand { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
+    .lc-sidebar-brand a { font-size: 1rem; font-weight: 700; color: var(--text) !important; text-decoration: none !important; letter-spacing: -0.02em; }
+    .lc-sidebar-brand .lc-mark { color: var(--primary); }
+
+    .lc-sidebar-section { padding: 14px 10px 6px; }
+    .lc-sidebar-label { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 0 8px 5px; }
+
+    .lc-nav { list-style: none; margin: 0; padding: 0; }
+    .lc-nav li a {
+        display: flex; align-items: center; gap: 9px;
+        padding: 7px 10px; border-radius: var(--rs);
+        font-size: 0.8rem; font-weight: 500;
+        color: var(--text-3) !important; text-decoration: none !important;
+        transition: all 0.1s; margin-bottom: 1px;
+    }
+    .lc-nav li a:hover { background: var(--hover); color: var(--text) !important; }
+    .lc-nav li a.active { background: var(--primary-8); color: var(--accent-text) !important; font-weight: 600; }
+    .lc-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.5; }
+    .lc-nav li a:hover svg, .lc-nav li a.active svg { opacity: 1; }
+
+    .lc-sidebar-footer {
+        margin-top: auto; padding: 14px; border-top: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .lc-sidebar-footer .lc-user { font-size: 0.725rem; font-weight: 500; color: var(--text-3); }
+    .lc-sidebar-footer .lc-user strong { color: var(--text); font-weight: 600; }
+    .lc-sidebar-footer a { font-size: 0.675rem; color: var(--text-muted) !important; text-decoration: none !important; }
+    .lc-sidebar-footer a:hover { color: var(--red) !important; }
+
+    .lc-theme-btn {
+        display: flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px;
+        border: 1px solid var(--border); border-radius: var(--rxs);
+        background: transparent; color: var(--text-muted);
+        cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+    }
+    .lc-theme-btn:hover { border-color: var(--text-3); color: var(--text-3); }
+    .lc-theme-btn svg { width: 14px; height: 14px; }
+
+    /* ── Main ── */
+    .lc-main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .lc-topbar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 20px; background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky; top: 0; z-index: 50;
+    }
+    .lc-topbar-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .lc-topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .lc-topbar-link {
+        font-size: 0.725rem; font-weight: 500; color: var(--text-3) !important;
+        text-decoration: none !important; padding: 5px 10px;
+        border: 1px solid var(--border); border-radius: var(--rxs); transition: all 0.1s;
+    }
+    .lc-topbar-link:hover { border-color: var(--text-3); color: var(--text-2) !important; }
+
+    #content { padding: 20px !important; max-width: 1200px !important; flex: 1; display: flex; flex-direction: column; }
+    #content > h1 {
+        font-size: 1.15rem !important; font-weight: 700 !important;
+        letter-spacing: -0.02em; color: var(--text) !important;
+        margin-bottom: 16px !important;
+    }
+    /* Hide original object-tools (moved into card toolbar by JS) */
+    #content > .object-tools { display: none !important; }
+
+    /* ══════ MODULES / CARDS ══════ */
+    .module {
+        background: var(--surface) !important; border: 1px solid var(--border) !important;
+        border-radius: var(--r) !important; box-shadow: var(--shadow) !important;
+        overflow: hidden; margin-bottom: 14px !important; padding: 0 !important;
+    }
+    .module h2, .module caption {
+        background: var(--surface) !important; color: var(--text-3) !important;
+        font-size: 0.68rem !important; font-weight: 600 !important;
+        text-transform: uppercase !important; letter-spacing: 0.05em !important;
+        padding: 9px 14px !important; border-bottom: 1px solid var(--border) !important;
+        margin: 0 !important;
+    }
+    .module table { margin: 0 !important; width: 100% !important; }
+    .module table th {
+        background: transparent !important; font-weight: 600 !important;
+        font-size: 0.68rem !important; color: var(--text-muted) !important;
+        text-transform: uppercase; letter-spacing: 0.04em; padding: 7px 14px !important;
+    }
+    .module table td {
+        padding: 7px 14px !important; border-bottom: 1px solid var(--border-light) !important;
+        color: var(--text) !important; font-size: 0.8rem;
+    }
+    .module table td a { color: var(--primary) !important; text-decoration: none !important; font-weight: 500; }
+    .module table td a:hover { text-decoration: underline !important; }
+
+    /* ══════ DASHBOARD GRID ══════ */
+    .dashboard #content-main { display: grid !important; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 900px) { .dashboard #content-main { grid-template-columns: 1fr !important; } }
+
+    /* ══════ HIDE FILTER SIDEBAR — replaced by inline selects via JS ══════ */
+    #changelist-filter { display: none !important; }
+
+    /* When filter sidebar is hidden, make changelist full width */
+    #changelist #changelist-filter ~ #changelist-form,
+    #changelist #changelist-form { width: 100% !important; }
+    #changelist .changelist-filter-clear { display: none; }
+
+    /* ══════ TOOLBAR — filters left, action buttons right ══════ */
+    .lc-card-toolbar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 0 0 12px; flex-wrap: wrap;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 0;
+    }
+    .lc-card-toolbar .lc-toolbar-filters {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0;
+    }
+    .lc-card-toolbar .lc-toolbar-actions {
+        display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0;
+    }
+
+    .lc-card-toolbar label {
+        font-size: 0.68rem !important; font-weight: 600;
+        color: var(--text-muted); text-transform: uppercase;
+        letter-spacing: 0.04em; white-space: nowrap;
+    }
+
+    .lc-filter-select {
+        appearance: none; -webkit-appearance: none;
+        height: 30px; padding: 0 28px 0 10px;
+        font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 500;
+        color: var(--text); background: var(--surface);
+        border: 1px solid var(--border); border-radius: var(--rxs);
+        cursor: pointer; transition: border-color 0.12s;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m2 3.5 3 3 3-3'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 8px center;
+    }
+    .lc-filter-select:hover { border-color: var(--text-muted); }
+    .lc-filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-8); }
+
+    /* ══════ CHANGELIST — flat, no card, fills to bottom ══════ */
+    .lc-changelist-card {
+        background: transparent; border: none; border-radius: 0;
+        box-shadow: none; flex: 1;
+    }
+
+    /* ══════ RESULT LIST — borderless, row dividers only ══════ */
+    #result_list {
+        border: none !important; border-radius: 0 !important;
+        box-shadow: none !important; overflow: visible !important;
+        margin: 0 !important;
+    }
+    #result_list table {
+        width: 100% !important; border-collapse: collapse !important;
+        border: none !important;
+    }
+
+    #result_list thead th {
+        background: transparent !important;
+        border: none !important; border-bottom: 1px solid var(--border) !important;
+        padding: 8px 0 !important; font-weight: 600 !important; font-size: 0.68rem !important;
+        color: var(--text-muted) !important; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    #result_list thead th a:link, #result_list thead th a:visited { color: var(--text-muted) !important; text-decoration: none !important; }
+    #result_list thead th.sorted a { color: var(--accent-text) !important; }
+
+    #result_list tbody tr { transition: background 0.08s; }
+    #result_list tbody tr:hover { background: var(--hover) !important; }
+    #result_list tbody td, #result_list tbody th {
+        padding: 10px 0 !important;
+        border: none !important; border-bottom: 1px solid var(--border-light) !important;
+        font-size: 0.8rem !important; color: var(--text) !important;
+    }
+    #result_list tbody td a { color: var(--primary) !important; text-decoration: none !important; font-weight: 500; }
+    #result_list tbody td a:hover { text-decoration: underline !important; }
+    #result_list tbody tr:last-child td { border-bottom: none !important; }
+    tr.row1, tr.row2 { background: transparent !important; }
+    table { border-collapse: collapse !important; border: none !important; }
+
+    /* ══════ LINKS ══════ */
+    a:link, a:visited { color: var(--primary); text-decoration: none; }
+    td a.changelink, td a.addlink { color: var(--primary) !important; font-weight: 500; font-size: 0.725rem; }
+    table th a:link, table th a:visited { color: var(--text) !important; }
+
+    /* ══════ BUTTONS ══════ */
+    input[type="submit"], button:not(.lc-theme-btn):not(.lc-mobile-toggle), .submit-row input, .button, a.button {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important; font-size: 0.775rem !important;
+        border-radius: var(--rs) !important; padding: 7px 16px !important;
+        cursor: pointer; transition: all 0.12s !important;
+        line-height: 1.2 !important; letter-spacing: 0 !important;
+    }
+
+    /* Primary / Save — dark fill */
+    input[type="submit"],
+    .submit-row input[type="submit"],
+    .button.default,
+    #content input[type="submit"],
+    #content .button.default {
+        background: var(--pill-active-bg) !important;
+        color: var(--pill-active-text) !important;
+        border: 1px solid transparent !important;
+    }
+    input[type="submit"]:hover,
+    .submit-row input[type="submit"]:hover,
+    .button.default:hover { opacity: 0.85; }
+
+    /* Submit row */
+    .submit-row {
+        background: var(--surface) !important; border: 1px solid var(--border) !important;
+        border-radius: var(--r) !important; padding: 12px 14px !important;
+        margin: 14px 0 !important; overflow: visible !important;
+        display: flex !important; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .submit-row p { margin: 0 !important; }
+    .submit-row .deletelink-box { margin-left: auto !important; }
+
+    /* Delete button — red fill */
+    .deletelink, a.deletelink,
+    a.deletelink:link, a.deletelink:visited,
+    p.deletelink-box a, p.deletelink-box a:link,
+    .submit-row a.deletelink, .submit-row a.deletelink:link,
+    .submit-row p.deletelink-box a,
+    #content a.deletelink, #content a.deletelink:link,
+    #content .submit-row a.deletelink {
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        height: 32px !important;
+        background: var(--red) !important; color: #fff !important;
+        border: none !important;
+        border-radius: var(--rs) !important; padding: 0 16px !important;
+        font-family: 'Inter', sans-serif !important; font-size: 0.775rem !important;
+        font-weight: 600 !important; text-decoration: none !important;
+        line-height: 1 !important; transition: opacity 0.12s !important;
+        cursor: pointer !important;
+    }
+    .deletelink:hover, a.deletelink:hover,
+    p.deletelink-box a:hover,
+    .submit-row a.deletelink:hover { opacity: 0.85 !important; background: var(--red) !important; color: #fff !important; }
+
+    /* Add button in object-tools */
+    .object-tools a.addlink,
+    .object-tools a.addlink:link,
+    .object-tools a.addlink:visited,
+    ul.object-tools li a.addlink {
+        background: var(--pill-active-bg) !important; color: var(--pill-active-text) !important;
+        border: none !important; border-radius: var(--rs) !important;
+        padding: 7px 16px !important; font-weight: 600 !important;
+        font-size: 0.775rem !important; text-decoration: none !important;
+    }
+    .object-tools a.addlink:hover { opacity: 0.85; }
+
+    /* ══════ FORMS / INPUTS ══════ */
+    input[type="text"], input[type="password"], input[type="email"],
+    input[type="number"], input[type="url"], textarea, select {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.8rem !important; padding: 6px 10px !important;
+        border: 1px solid var(--border) !important; border-radius: var(--rxs) !important;
+        background: var(--surface) !important; color: var(--text) !important;
+        transition: border-color 0.12s; outline: none !important;
+    }
+    input[type="text"]:focus, input[type="password"]:focus,
+    textarea:focus, select:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 2px var(--primary-8) !important;
+    }
+
+    /* ══════ ACTIONS — original hidden, replaced by toolbar buttons ══════ */
+    .actions { display: none !important; }
+
+    /* Action buttons in toolbar */
+    .lc-action-btn {
+        display: inline-flex; align-items: center; gap: 5px;
+        height: 30px; padding: 0 12px;
+        font-family: 'Inter', sans-serif; font-size: 0.725rem; font-weight: 600;
+        border: 1px solid var(--border); border-radius: var(--rs);
+        background: transparent; color: var(--text-3);
+        cursor: pointer; transition: all 0.12s; white-space: nowrap;
+    }
+    .lc-action-btn:hover { border-color: var(--text-muted); color: var(--text-2); }
+    .lc-action-btn.delete { border-color: var(--red); color: var(--red); }
+    .lc-action-btn.delete:hover { background: var(--red-bg); }
+    .lc-action-btn.add {
+        background: var(--pill-active-bg); color: var(--pill-active-text);
+        border-color: transparent; text-decoration: none !important;
+    }
+    .lc-action-btn.add:hover { opacity: 0.85; background: var(--pill-active-bg); color: var(--pill-active-text); }
+    .lc-action-btn svg { width: 13px; height: 13px; }
+
+    input[type="checkbox"] { accent-color: var(--primary); width: 14px; height: 14px; }
+
+    /* ══════ TOOLBAR / SEARCH (moved into toolbar row by JS) ══════ */
+    #toolbar { display: none !important; }
+
+    .lc-search-wrap {
+        position: relative; display: inline-flex; align-items: center;
+    }
+    .lc-search-wrap svg {
+        position: absolute; left: 8px; width: 13px; height: 13px;
+        color: var(--text-muted); pointer-events: none;
+    }
+    .lc-search-input {
+        height: 30px; width: 180px;
+        border: 1px solid var(--border); border-radius: var(--rxs);
+        padding: 0 10px 0 28px !important; font-family: 'Inter', sans-serif;
+        font-size: 0.75rem; font-weight: 500;
+        background: var(--surface); color: var(--text);
+        transition: border-color 0.12s, width 0.2s; outline: none;
+    }
+    .lc-search-input::placeholder { color: var(--text-muted); }
+    .lc-search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-8); width: 220px; }
+
+    /* ══════ OBJECT TOOLS (non-changelist pages like edit/change forms) ══════ */
+    .object-tools {
+        margin: 0 0 14px !important; padding: 0 !important;
+        list-style: none !important; display: flex;
+        gap: 6px; float: none !important;
+    }
+    .object-tools li { display: inline-flex; margin: 0 !important; padding: 0 !important; }
+    .object-tools a, .object-tools a:link, .object-tools a:visited {
+        display: inline-flex !important; align-items: center !important;
+        background: transparent !important; color: var(--text-3) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: var(--rs) !important; padding: 7px 14px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.775rem !important; font-weight: 500 !important;
+        text-decoration: none !important; transition: all 0.12s;
+    }
+    .object-tools a:hover { border-color: var(--text-muted) !important; color: var(--text-2) !important; }
+
+    /* ══════ PAGINATION ══════ */
+    .paginator {
+        background: transparent !important; border: none !important;
+        padding: 12px 0 !important; font-size: 0.725rem; color: var(--text-3) !important;
+        margin: 0 !important;
+    }
+    .paginator a:link, .paginator a:visited { color: var(--primary) !important; font-weight: 600; padding: 3px 8px; border-radius: var(--rxs); }
+    .paginator a:hover { background: var(--primary-5); }
+
+    /* ══════ MESSAGES ══════ */
+    ul.messagelist { padding: 0 !important; margin: 0 0 14px !important; list-style: none !important; }
+    ul.messagelist li {
+        background: var(--surface) !important; border: 1px solid var(--border) !important;
+        border-left: 3px solid var(--green) !important; border-radius: var(--rs) !important;
+        color: var(--text) !important; padding: 8px 12px !important;
+        margin: 0 0 6px !important; font-size: 0.8rem; font-weight: 500;
+    }
+    ul.messagelist li.error { border-left-color: var(--red) !important; }
+    ul.messagelist li.warning { border-left-color: var(--yellow) !important; }
+
+    /* ══════ INLINES ══════ */
+    .inline-group { margin-top: 14px; }
+    .inline-group h2 { margin-bottom: 0 !important; }
+    .inline-group .tabular td, .inline-group .tabular th { padding: 6px 12px !important; }
+    .inline-related h3 { background: var(--surface) !important; color: var(--text-3) !important; border-bottom: 1px solid var(--border) !important; padding: 7px 12px !important; font-size: 0.725rem !important; }
+
+    /* ══════ FIELDSETS ══════ */
+    fieldset.module { padding: 0 !important; }
+    fieldset.module .form-row { padding: 9px 14px !important; border-bottom: 1px solid var(--border-light) !important; color: var(--text) !important; }
+    fieldset.module .form-row label { color: var(--text) !important; font-weight: 500; font-size: 0.8rem; }
+    .related-widget-wrapper select { min-width: 200px; }
+    .help, p.help, span.help { font-size: 0.675rem !important; color: var(--text-muted) !important; }
+    .errorlist li { color: var(--red) !important; font-size: 0.725rem; }
+
+    /* ══════ RECENT ACTIONS ══════ */
+    #recent-actions-module h2 { background: var(--surface) !important; color: var(--text-3) !important; }
+    #recent-actions-module li { padding: 6px 12px !important; font-size: 0.775rem; border-bottom: 1px solid var(--border-light) !important; color: var(--text) !important; }
+    #recent-actions-module li a { color: var(--primary) !important; }
+
+    /* ══════ LOGIN ══════ */
+    body.login .lc-sidebar { display: none; }
+    body.login .lc-main { margin-left: 0; }
+    body.login #container { background: var(--bg) !important; min-height: 100vh !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+    body.login #content { background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: var(--r) !important; box-shadow: var(--shadow-md) !important; padding: 24px !important; width: 100%; max-width: 360px; }
+    body.login #content label { color: var(--text) !important; }
+
+    /* ══════ RESPONSIVE ══════ */
+    @media (max-width: 768px) {
+        .lc-sidebar { transform: translateX(-100%); }
+        .lc-sidebar.open { transform: translateX(0); }
+        .lc-main { margin-left: 0 !important; }
+        #content { padding: 14px !important; }
+        .lc-mobile-toggle { display: flex !important; }
+    }
+    .lc-mobile-toggle {
+        display: none; align-items: center; justify-content: center;
+        width: 32px; height: 32px;
+        background: transparent; border: 1px solid var(--border);
+        border-radius: var(--rxs); cursor: pointer; color: var(--text-3);
+    }
+    .lc-mobile-toggle svg { width: 16px; height: 16px; }
+
+    .calendarbox, .clockbox { background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: var(--rs) !important; }
+</style>
+{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+{% block bodyclass %}{{ block.super }}{% endblock %}
+
+{% block header %}
+<nav class="lc-sidebar" id="lc-sidebar">
+    <div class="lc-sidebar-brand">
+        <a href="{% url 'admin:index' %}"><span class="lc-mark">LC</span> Tracker</a>
+    </div>
+    <div class="lc-sidebar-section">
+        <div class="lc-sidebar-label">Navigation</div>
+        <ul class="lc-nav" id="lc-nav">
+            <li><a href="{% url 'admin:index' %}" data-model="index"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a></li>
+            <li><a href="{% url 'admin:core_group_changelist' %}" data-model="group"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>Groups</a></li>
+            <li><a href="{% url 'admin:core_user_changelist' %}" data-model="user"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</a></li>
+            <li><a href="{% url 'admin:core_lesson_changelist' %}" data-model="lesson"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Lessons</a></li>
+            <li><a href="{% url 'admin:core_problem_changelist' %}" data-model="problem"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>Problems</a></li>
+            <li><a href="{% url 'admin:core_solvedproblem_changelist' %}" data-model="solvedproblem"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Solutions</a></li>
+        </ul>
+    </div>
+    <div class="lc-sidebar-section">
+        <div class="lc-sidebar-label">Quick links</div>
+        <ul class="lc-nav">
+            <li><a href="/" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View Tracker</a></li>
+        </ul>
+    </div>
+    <div class="lc-sidebar-footer">
+        <button class="lc-theme-btn" type="button" onclick="lcToggleTheme()">
+            <svg id="ti-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg id="ti-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div style="text-align:right">
+            <div class="lc-user">{% if user.is_authenticated %}<strong>{{ user.get_short_name|default:user.username }}</strong>{% endif %}</div>
+            <a href="{% url 'admin:logout' %}">Sign out</a>
+        </div>
+    </div>
+</nav>
+
+<div class="lc-topbar" id="lc-topbar">
+    <div style="display:flex;align-items:center;gap:8px">
+        <button class="lc-mobile-toggle" onclick="document.getElementById('lc-sidebar').classList.toggle('open')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="lc-topbar-title" id="lc-page-title">Dashboard</span>
+    </div>
+    <div class="lc-topbar-actions">
+        <a href="/" class="lc-topbar-link" target="_blank">View Site</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<script>
+(function() {
+    /* Theme */
+    var saved = localStorage.getItem('lc-theme');
+    var prefer = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    applyTheme(saved || prefer);
+
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('lc-theme', t);
+        var el = document.getElementById('ti-light');
+        var ed = document.getElementById('ti-dark');
+        if (el) el.style.display = t === 'light' ? '' : 'none';
+        if (ed) ed.style.display = t === 'dark' ? '' : 'none';
+    }
+    window.lcToggleTheme = function() {
+        var c = document.documentElement.getAttribute('data-theme');
+        applyTheme(c === 'dark' ? 'light' : 'dark');
+    };
+
+    /* Active nav */
+    var path = window.location.pathname;
+    var links = document.querySelectorAll('#lc-nav a');
+    var best = null, bestLen = 0;
+    links.forEach(function(a) {
+        var h = a.getAttribute('href');
+        var m = a.getAttribute('data-model');
+        if (m === 'index' && path === h) { best = a; bestLen = 9999; }
+        else if (path.indexOf(h) === 0 && h.length > bestLen) { best = a; bestLen = h.length; }
+    });
+    if (best) {
+        best.classList.add('active');
+        var pt = document.getElementById('lc-page-title');
+        if (pt) pt.textContent = best.textContent.trim();
+    }
+
+    /* Wrap main content */
+    var sidebar = document.getElementById('lc-sidebar');
+    var container = document.getElementById('container');
+    if (container && sidebar) {
+        var main = document.createElement('div');
+        main.className = 'lc-main';
+        var ch = Array.from(container.childNodes);
+        ch.forEach(function(c) { if (c !== sidebar) main.appendChild(c); });
+        container.appendChild(main);
+    }
+
+    /* Wrap changelist in card, build toolbar: [filters] ... [delete] [+ add] */
+    var changelist = document.getElementById('changelist');
+    var objTools = document.querySelector('#content > .object-tools');
+
+    if (changelist) {
+        /* Hide "Select X to change" heading */
+        var contentH1 = document.querySelector('#content > h1');
+        if (contentH1) contentH1.style.display = 'none';
+
+        /* Wrap changelist in card */
+        var card = document.createElement('div');
+        card.className = 'lc-changelist-card';
+        changelist.parentNode.insertBefore(card, changelist);
+        card.appendChild(changelist);
+
+        /* Build toolbar */
+        var toolbar = document.createElement('div');
+        toolbar.className = 'lc-card-toolbar';
+
+        var filtersWrap = document.createElement('div');
+        filtersWrap.className = 'lc-toolbar-filters';
+
+        var actionsWrap = document.createElement('div');
+        actionsWrap.className = 'lc-toolbar-actions';
+
+        /* ── Search: move into toolbar with icon ── */
+        var origSearchBar = document.getElementById('searchbar');
+        var origSearchForm = origSearchBar ? origSearchBar.closest('form') : null;
+        if (origSearchBar && origSearchForm) {
+            var searchWrap = document.createElement('div');
+            searchWrap.className = 'lc-search-wrap';
+            searchWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+            var searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'lc-search-input';
+            searchInput.placeholder = 'Search...';
+            searchInput.value = origSearchBar.value || '';
+            searchWrap.appendChild(searchInput);
+            filtersWrap.appendChild(searchWrap);
+
+            /* Debounced auto-submit */
+            var searchTimer = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() {
+                    origSearchBar.value = searchInput.value;
+                    origSearchForm.submit();
+                }, 400);
+            });
+        }
+
+        /* ── Filters: convert sidebar <select> dropdowns ── */
+        var filterDiv = document.getElementById('changelist-filter');
+        if (filterDiv) {
+            /* Django 5.x: <details><summary>, older: <h3> */
+            var sections = filterDiv.querySelectorAll('details');
+            if (sections.length > 0) {
+                sections.forEach(function(det) {
+                    var summary = det.querySelector('summary');
+                    var ul = det.querySelector('ul');
+                    if (!summary || !ul) return;
+                    var label = document.createElement('label');
+                    label.textContent = summary.textContent.replace(/^By\s+/i, '').trim();
+                    var select = document.createElement('select');
+                    select.className = 'lc-filter-select';
+                    ul.querySelectorAll('li').forEach(function(li) {
+                        var a = li.querySelector('a');
+                        if (!a) return;
+                        var opt = document.createElement('option');
+                        opt.value = a.href;
+                        opt.textContent = a.textContent.trim();
+                        if (li.classList.contains('selected')) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+                    select.onchange = function() { window.location.href = this.value; };
+                    filtersWrap.appendChild(label);
+                    filtersWrap.appendChild(select);
+                });
+            } else {
+                filterDiv.querySelectorAll('h3').forEach(function(h3) {
+                    var label = document.createElement('label');
+                    label.textContent = h3.textContent.replace(/^By\s+/i, '').trim();
+                    var select = document.createElement('select');
+                    select.className = 'lc-filter-select';
+                    var ul = h3.nextElementSibling;
+                    if (!ul || ul.tagName !== 'UL') return;
+                    ul.querySelectorAll('li').forEach(function(li) {
+                        var a = li.querySelector('a');
+                        if (!a) return;
+                        var opt = document.createElement('option');
+                        opt.value = a.href;
+                        opt.textContent = a.textContent.trim();
+                        if (li.classList.contains('selected')) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+                    select.onchange = function() { window.location.href = this.value; };
+                    filtersWrap.appendChild(label);
+                    filtersWrap.appendChild(select);
+                });
+            }
+        }
+
+        /* ── Action buttons (delete selected etc.) ── */
+        var actionsDiv = document.querySelector('.actions');
+        var actionsSelect = actionsDiv ? actionsDiv.querySelector('select[name="action"]') : null;
+        if (actionsDiv && actionsSelect) {
+            var opts = actionsSelect.querySelectorAll('option');
+            opts.forEach(function(opt) {
+                if (!opt.value) return;
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lc-action-btn';
+                if (opt.value.indexOf('delete') !== -1) {
+                    btn.classList.add('delete');
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' + opt.textContent.trim();
+                } else {
+                    btn.textContent = opt.textContent.trim();
+                }
+                btn.addEventListener('click', function() {
+                    actionsSelect.value = opt.value;
+                    var goBtn = actionsDiv.querySelector('button[type="submit"], input[type="submit"]');
+                    if (goBtn) goBtn.click();
+                });
+                actionsWrap.appendChild(btn);
+            });
+        }
+
+        /* ── Add button (extract from object-tools, render as lc-action-btn) ── */
+        if (objTools) {
+            var addLink = objTools.querySelector('a.addlink') || objTools.querySelector('a');
+            if (addLink) {
+                var addBtn = document.createElement('a');
+                addBtn.href = addLink.href;
+                addBtn.className = 'lc-action-btn add';
+                addBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' + addLink.textContent.trim();
+                actionsWrap.appendChild(addBtn);
+            }
+            /* Hide original object-tools */
+            objTools.style.display = 'none';
+        }
+
+        toolbar.appendChild(filtersWrap);
+        toolbar.appendChild(actionsWrap);
+
+        /* Insert toolbar as first child of card (before changelist) */
+        card.insertBefore(toolbar, card.firstChild);
+    }
+
+})();
+</script>
+{% endblock %}

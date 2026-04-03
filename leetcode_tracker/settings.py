@@ -56,7 +56,9 @@ ROOT_URLCONF = "leetcode_tracker.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "core" / "templates"],
+        "DIRS": [
+            BASE_DIR / "core" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

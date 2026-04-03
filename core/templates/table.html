@@ -1,262 +1,502 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8" />
-    <title>LeetCode Solved Matrix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root, [data-theme="light"] {
+            --bg: #f7f8fa;
+            --surface: #fff;
+            --surface-2: #f9fafb;
+            --border: #e5e7eb;
+            --border-light: #f1f3f5;
+            --text: #111827;
+            --text-2: #374151;
+            --text-3: #6b7280;
+            --text-muted: #9ca3af;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-5: rgba(99,102,241,0.05);
+            --accent-8: rgba(99,102,241,0.08);
+            --accent-12: rgba(99,102,241,0.12);
+            --accent-text: #6366f1;
+            --pill-bg: transparent;
+            --pill-hover: rgba(0,0,0,0.04);
+            --pill-active-bg: var(--text);
+            --pill-active-text: #fff;
+            --solved: #10b981;
+            --solved-bg: #ecfdf5;
+            --unsolved-bg: #f3f4f6;
+            --hover-row: rgba(0,0,0,0.015);
+            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --toast-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0c0d12;
+            --surface: #16181f;
+            --surface-2: #1c1f28;
+            --border: #262935;
+            --border-light: #1f222c;
+            --text: #e5e7eb;
+            --text-2: #d1d5db;
+            --text-3: #9ca3af;
+            --text-muted: #6b7280;
+            --accent: #818cf8;
+            --accent-hover: #6366f1;
+            --accent-5: rgba(129,140,248,0.05);
+            --accent-8: rgba(129,140,248,0.08);
+            --accent-12: rgba(129,140,248,0.12);
+            --accent-text: #a5b4fc;
+            --pill-bg: transparent;
+            --pill-hover: rgba(255,255,255,0.06);
+            --pill-active-bg: #e5e7eb;
+            --pill-active-text: #111827;
+            --solved: #34d399;
+            --solved-bg: rgba(16,185,129,0.1);
+            --unsolved-bg: #1f222c;
+            --hover-row: rgba(255,255,255,0.02);
+            --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
+            --toast-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.2s, color 0.2s;
         }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
+        .page { max-width: 100%; padding: 16px 12px; }
+        @media (min-width: 768px) { .page { padding: 20px; } }
+        @media (min-width: 1200px) { .page { max-width: 1500px; margin: 0 auto; padding: 24px 32px; } }
+
+        /* ── Header ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            gap: 12px;
         }
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow-y: auto;
+        .topbar h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.03em; white-space: nowrap; }
+        .topbar h1 span { color: var(--accent); }
+
+        .topbar-right { display: flex; align-items: center; gap: 6px; }
+
+        .icon-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            background: transparent; border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; color: var(--text-muted);
+            transition: all 0.12s; font-family: inherit;
+        }
+        .icon-btn:hover { border-color: var(--text-3); color: var(--text-3); }
+        .icon-btn svg { width: 15px; height: 15px; }
+
+        .btn-sync {
+            display: inline-flex; align-items: center; gap: 5px;
+            height: 32px; padding: 0 12px;
+            font-family: inherit; font-size: 0.775rem; font-weight: 500;
+            color: var(--text-3); background: transparent;
+            border: 1px solid var(--border); border-radius: 8px;
+            cursor: pointer; transition: all 0.12s; white-space: nowrap;
+        }
+        .btn-sync:hover:not(:disabled) { border-color: var(--text-3); color: var(--text-2); }
+        .btn-sync:active:not(:disabled) { transform: scale(0.97); }
+        .btn-sync:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-sync svg { width: 13px; height: 13px; }
+        .btn-sync.loading svg { animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Filter pills ── */
+        .filters { margin-bottom: 12px; }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
         }
 
-        th, td {
-            padding: 10px 12px;
-            text-align: center;
+        .filter-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding-right: 4px;
+            flex-shrink: 0;
         }
+
+        .pill {
+            display: inline-flex; align-items: center;
+            height: 28px; padding: 0 12px;
+            font-family: inherit; font-size: 0.75rem; font-weight: 500;
+            color: var(--text-3);
+            background: var(--pill-bg);
+            border: none; border-radius: 99px;
+            cursor: pointer; transition: all 0.12s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .pill:hover { background: var(--pill-hover); color: var(--text-2); }
+
+        .pill.active {
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
+            font-weight: 600;
+        }
+
+        /* ── Table card ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-input {
+            flex: 1; height: 32px;
+            font-family: inherit; font-size: 0.775rem;
+            color: var(--text); background: var(--surface-2);
+            border: 1px solid transparent; border-radius: 7px;
+            padding: 0 10px 0 30px;
+            transition: all 0.12s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='5.5' cy='5.5' r='4.5'/%3E%3Cpath d='m12 12-3-3'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 9px center;
+        }
+        .search-input::placeholder { color: var(--text-muted); }
+        .search-input:focus { outline: none; border-color: var(--border); background: var(--surface); }
+
+        /* ── Table ── */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 560px; }
+
+        thead th:first-child, tbody td.problem {
+            position: sticky; left: 0; z-index: 5; background: var(--surface);
+        }
+        thead th:first-child { z-index: 11; }
+        tr:hover td.problem { background: var(--hover-row); }
+        tr.lesson-row td { position: static; }
 
         thead th {
-            background-color: #4caf50;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 2;
+            position: sticky; top: 0; z-index: 10;
+            background: var(--surface);
+            padding: 10px 10px; font-weight: 600; font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-muted); border-bottom: 1px solid var(--border);
+            white-space: nowrap; text-align: center;
+        }
+        thead th:first-child {
+            text-align: left; min-width: 170px;
+            border-right: 1px solid var(--border-light);
         }
 
-        td.problem {
-            background-color: #f0f0f0;
-            font-weight: bold;
-            text-align: left;
-            color: #333;
+        .user-header { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .user-header .name {
+            font-weight: 600; color: var(--text-2);
+            text-transform: none; letter-spacing: normal; font-size: 0.75rem;
+        }
+        .user-header .count {
+            font-size: 0.6rem; font-weight: 600; color: var(--solved);
+            background: var(--solved-bg); padding: 1px 6px; border-radius: 99px;
         }
 
-        td.problem a {
-            color: #333;
-            text-decoration: none;
-        }
-
-        td.problem a:hover {
-            text-decoration: underline;
-        }
-
-        tr.lesson-row td {
-            background-color: #ddd;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px 0;
-            font-size: 1.1rem;
+        .lesson-row td {
+            padding: 6px 10px; font-weight: 600; font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--accent-text); background: var(--accent-5);
+            border-bottom: 1px solid var(--border-light);
         }
 
         td {
-            border-bottom: 1px solid #e0e0e0;
+            padding: 6px 10px; text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.08s;
         }
 
-        td:hover {
-            background-color: #f9f9f9;
+        td.problem {
+            text-align: left; font-weight: 500; color: var(--text);
+            white-space: nowrap; border-right: 1px solid var(--border-light);
+            font-size: 0.78rem;
         }
 
-        td.solved {
-            background-color: #d4edda;
-            color: #155724;
-            font-weight: bold;
+        td.problem a { color: var(--text); text-decoration: none; transition: color 0.12s; }
+        td.problem a:hover { color: var(--accent); }
+
+        td.solved, td.unsolved { font-size: 0; vertical-align: middle; }
+
+        td.solved::after, td.unsolved::after {
+            content: ''; display: inline-block;
+            width: 18px; height: 18px; border-radius: 4px;
+            transition: transform 0.1s;
         }
 
-        td.unsolved {
-            background-color: #f8d7da;
-            color: #721c24;
-            font-weight: bold;
+        td.solved::after {
+            background: var(--solved);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 6 2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center;
         }
 
-        .filters {
-    max-width: 1200px;
-    margin: 0 auto 20px;
-    padding: 16px 20px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
+        [data-theme="dark"] td.solved::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='none' stroke='%230c0d12' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 6 2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+        }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
+        td.unsolved::after { background: var(--unsolved-bg); }
 
-.filter-group label {
-    font-size: 0.85rem;
-    color: #555;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
+        tr:hover td { background: var(--hover-row); }
+        tr:hover td.solved::after { transform: scale(1.1); }
+        tr.lesson-row:hover td { background: var(--accent-5); }
+        tr.hidden-row { display: none; }
 
-.filter-group select {
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    min-width: 200px;
-    background-color: #fff;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+        .empty-state p { font-size: 0.85rem; font-weight: 500; }
 
-.filter-group select:hover {
-    border-color: #4caf50;
-}
+        .no-results {
+            display: none; text-align: center; padding: 32px 20px;
+            color: var(--text-muted); font-size: 0.8rem; font-weight: 500;
+        }
+        .no-results.visible { display: block; }
 
-.filter-group select:focus {
-    outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
+        .footer-stats {
+            display: flex; gap: 14px; justify-content: center;
+            padding: 12px; color: var(--text-muted); font-size: 0.68rem;
+        }
+        .footer-stats span { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot.green { background: var(--solved); }
+        .dot.gray { background: var(--unsolved-bg); border: 1px solid var(--border); }
 
-.btn {
-    display: inline-block;
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    height: 36px;
-    font-weight: 600;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
+        /* ── Toast ── */
+        .toast {
+            position: fixed; top: 16px; right: 16px;
+            padding: 10px 16px; border-radius: 8px;
+            font-family: inherit; font-size: 0.775rem; font-weight: 500;
+            color: white; box-shadow: var(--toast-shadow); z-index: 1000;
+            transform: translateX(calc(100% + 40px));
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            max-width: 300px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: #059669; }
+        .toast.error { background: #dc2626; }
 
-.btn-primary {
-    background-color: #4caf50;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #45a049;
-    transform: translateY(-1px);
-}
-
-.btn-primary:active {
-    background-color: #3e8e41;
-    transform: translateY(0);
-}
-
-.filters form {
-    display: flex;
-    gap: 24px;
-    align-items: flex-end;
-    justify-content: space-between; /* <-- added: push refresh button to the right */
-    flex-wrap: wrap; /* optional: wrap on small screens */
-}
-
-.filters .filters-left {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-}
-
-.filters .filters-right {
-    display: flex;
-    align-items: center;
-}
-
-</style>
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+            .page { padding: 10px 6px; }
+            .topbar h1 { font-size: 1rem; }
+            .filter-row { gap: 4px; margin-bottom: 6px; }
+            .pill { height: 26px; padding: 0 10px; font-size: 0.7rem; }
+            .filter-label { font-size: 0.62rem; }
+            .card-toolbar { padding: 8px 10px; }
+            table { min-width: 480px; }
+            thead th:first-child { min-width: 130px; }
+            td, thead th { padding: 5px 7px; }
+            td.solved::after, td.unsolved::after { width: 16px; height: 16px; border-radius: 3px; }
+        }
+    </style>
 </head>
 <body>
-<h2>LeetCode Solved Problem Matrix</h2>
 
-<div class="filters" style="display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto 20px;">
-    <!-- Left: GET filters -->
-    <form id="filter-form" method="get" style="display:flex; gap:24px; align-items:center;">
-        <div class="filter-group">
-            <label for="group">Group</label>
-            <select name="group" id="group" onchange="this.form.submit()">
-                <option value="">All groups</option>
-                {% for g in groups %}
-                    <option value="{{ g.id }}" {% if g.id|stringformat:"s" == selected_group %}selected{% endif %}>
-                        {{ g.name }}
-                    </option>
-                {% endfor %}
-            </select>
+<div class="page">
+    <!-- Top bar -->
+    <div class="topbar">
+        <h1><span>LC</span> Tracker</h1>
+        <div class="topbar-right">
+            <button type="button" class="btn-sync" id="sync-btn" onclick="doSync()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+                <span id="sync-label">Sync</span>
+            </button>
+            <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
         </div>
+    </div>
 
-        <div class="filter-group">
-            <label for="lesson">Lesson</label>
-            <select name="lesson" id="lesson" onchange="this.form.submit()">
-                <option value="">All lessons</option>
-                {% for l in lessons %}
-                    <option value="{{ l.id }}" {% if l.id|stringformat:"s" == selected_lesson %}selected{% endif %}>
-                        {{ l.title }}
-                    </option>
-                {% endfor %}
-            </select>
+    <!-- Filter pills -->
+    <div class="filters">
+        <div class="filter-row">
+            <span class="filter-label">Group</span>
+            <a href="?{% if selected_lesson %}lesson={{ selected_lesson }}{% endif %}" class="pill {% if not selected_group %}active{% endif %}">All</a>
+            {% for g in groups %}
+                <a href="?group={{ g.id }}{% if selected_lesson %}&lesson={{ selected_lesson }}{% endif %}" class="pill {% if g.id|stringformat:'s' == selected_group %}active{% endif %}">{{ g.name }}</a>
+            {% endfor %}
         </div>
-    </form>
+        <div class="filter-row">
+            <span class="filter-label">Lesson</span>
+            <a href="?{% if selected_group %}group={{ selected_group }}{% endif %}" class="pill {% if not selected_lesson %}active{% endif %}">All</a>
+            {% for l in lessons %}
+                <a href="?{% if selected_group %}group={{ selected_group }}&{% endif %}lesson={{ l.id }}" class="pill {% if l.id|stringformat:'s' == selected_lesson %}active{% endif %}">{{ l.title }}</a>
+            {% endfor %}
+        </div>
+    </div>
 
-    <!-- Right: Refresh button -->
-    <form id="refresh-form" action="{% url 'refresh_leetcode' %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <input type="hidden" name="group" value="{{ selected_group }}">
-        <input type="hidden" name="lesson" value="{{ selected_lesson }}">
-        <button type="submit" class="btn btn-primary">
-            <svg width="18px" height="18px" viewBox="-0.45 0 60.369 60.369" xmlns="http://www.w3.org/2000/svg">
-                <g id="Group_63" data-name="Group 63" transform="translate(-446.571 -211.615)">
-                    <path id="Path_54" data-name="Path 54" d="M504.547,265.443h-9.019a30.964,30.964,0,0,0-29.042-52.733,1.5,1.5,0,1,0,.792,2.894,27.955,27.955,0,0,1,25.512,48.253l0-10.169h-.011a1.493,1.493,0,0,0-2.985,0h0v13.255a1.5,1.5,0,0,0,1.5,1.5h13.256a1.5,1.5,0,1,0,0-3Z" fill="#fff" stroke="currentColor" stroke-width="4"/>
-                    <path id="Path_55" data-name="Path 55" d="M485.389,267.995a27.956,27.956,0,0,1-25.561-48.213l0,10.2h.015a1.491,1.491,0,0,0,2.978,0h.007V216.791a1.484,1.484,0,0,0-1.189-1.532l-.018-.005a1.533,1.533,0,0,0-.223-.022c-.024,0-.046-.007-.07-.007H448.071a1.5,1.5,0,0,0,0,3h8.995a30.963,30.963,0,0,0,29.115,52.664,1.5,1.5,0,0,0-.792-2.894Z" fill="#fff" stroke="currentColor" stroke-width="4"/>
-                </g>
-            </svg>
-        </button>
-    </form>
+    <!-- Table card -->
+    <div class="card">
+        <div class="card-toolbar">
+            <input type="text" class="search-input" id="table-search" placeholder="Search problems..." oninput="filterTable()" />
+        </div>
+        <div class="table-scroll">
+            {% if lesson_groups %}
+            <table id="main-table">
+                <thead>
+                    <tr>
+                        <th>Problem</th>
+                        {% for user in users %}
+                        <th>
+                            <div class="user-header">
+                                <span class="name">{{ user.name }}</span>
+                                <span class="count">{{ user.solved_count }}</span>
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson, problems in lesson_groups.items %}
+                    <tr class="lesson-row" data-lesson="{{ lesson }}">
+                        <td colspan="{{ users|length|add:1 }}">{{ lesson }}</td>
+                    </tr>
+                    {% for p in problems %}
+                    <tr class="problem-row" data-problem="{{ p.problem.title|lower }}">
+                        <td class="problem">
+                            <a href="https://leetcode.com/problems/{{ p.problem.slug }}/" target="_blank" rel="noopener">{{ p.problem.title }}</a>
+                        </td>
+                        {% for status in p.solved_status %}
+                        <td class="{% if status %}solved{% else %}unsolved{% endif %}"></td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="no-results" id="no-results">No problems match your search.</div>
+            {% else %}
+            <div class="empty-state">
+                <p>No problems found. Try adjusting your filters.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer-stats">
+        <span><span class="dot green"></span> Solved</span>
+        <span><span class="dot gray"></span> Not solved</span>
+    </div>
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Problem</th>
-            {% for user in users %}
-                <th>{{ user.name }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
+<div class="toast" id="toast"></div>
 
-    <tbody>
-        {% for lesson, problems in lesson_groups.items %}
-            <!-- Lesson Header -->
-            <tr class="lesson-row">
-                <td colspan="{{ users|length|add:1 }}">{{ lesson }}</td>
-            </tr>
+<script>
+(function() {
+    var s = localStorage.getItem('lc-theme');
+    var p = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    setTheme(s || p);
+})();
 
-            {% for p in problems %}
-                <tr>
-                    <td class="problem">
-                        <a href="https://leetcode.com/problems/{{ p.problem.slug }}/" target="_blank">
-                            {{ p.problem.title }}
-                        </a>
-                    </td>
+function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('lc-theme', t);
+    document.getElementById('theme-icon-light').style.display = t === 'light' ? '' : 'none';
+    document.getElementById('theme-icon-dark').style.display  = t === 'dark'  ? '' : 'none';
+}
 
-                    {% for status in p.solved_status %}
-                        {% if status %}
-                            <td class="solved">✅</td>
-                        {% else %}
-                            <td class="unsolved">❌</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        {% endfor %}
-    </tbody>
-</table>
+function toggleTheme() {
+    setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+function filterTable() {
+    var q = document.getElementById('table-search').value.trim().toLowerCase();
+    var rows = document.querySelectorAll('#main-table tbody tr.problem-row');
+    var lessons = document.querySelectorAll('#main-table tbody tr.lesson-row');
+    var vis = 0;
+
+    rows.forEach(function(r) {
+        var m = !q || (r.getAttribute('data-problem') || '').indexOf(q) !== -1;
+        r.classList.toggle('hidden-row', !m);
+        if (m) vis++;
+    });
+
+    lessons.forEach(function(lr) {
+        var has = false, n = lr.nextElementSibling;
+        while (n && !n.classList.contains('lesson-row')) {
+            if (n.classList.contains('problem-row') && !n.classList.contains('hidden-row')) { has = true; break; }
+            n = n.nextElementSibling;
+        }
+        lr.classList.toggle('hidden-row', !has);
+    });
+
+    var nr = document.getElementById('no-results');
+    if (nr) nr.classList.toggle('visible', vis === 0 && q.length > 0);
+}
+
+function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    requestAnimationFrame(function() { t.classList.add('show'); });
+    setTimeout(function() { t.classList.remove('show'); }, 4000);
+}
+
+function doSync() {
+    var btn = document.getElementById('sync-btn');
+    var lbl = document.getElementById('sync-label');
+    if (btn.disabled) return;
+    btn.disabled = true; btn.classList.add('loading'); lbl.textContent = 'Syncing...';
+
+    var ps = new URLSearchParams(window.location.search);
+    var body = {};
+    if (ps.get('group')) body.group = ps.get('group');
+    if (ps.get('lesson')) body.lesson = ps.get('lesson');
+
+    fetch('/refresh/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function(r) { if (!r.ok) throw new Error('Server ' + r.status); return r.json(); })
+    .then(function(d) {
+        var m = 'Synced ' + (d.synced_users||0) + ' user' + ((d.synced_users||0) !== 1 ? 's' : '');
+        if ((d.updated||0) > 0) m += ', ' + d.updated + ' new';
+        if (d.errors && d.errors.length) { showToast(m + '. Failed: ' + d.errors.join(', '), 'error'); }
+        else { showToast(m, 'success'); }
+        setTimeout(function() { location.reload(); }, 1200);
+    })
+    .catch(function(e) {
+        showToast('Sync failed: ' + e.message, 'error');
+        btn.disabled = false; btn.classList.remove('loading'); lbl.textContent = 'Sync';
+    });
+}
+</script>
 </body>
 </html>

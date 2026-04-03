@@ -1,0 +1,355 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Dashboard | LC Tracker{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Dashboard-specific styles ── */
+    .lc-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .lc-stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        transition: box-shadow 0.15s, transform 0.15s;
+        text-decoration: none !important;
+    }
+
+    a.lc-stat-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .lc-stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .lc-stat-icon svg { width: 20px; height: 20px; }
+    .lc-stat-icon.purple { background: var(--accent-light); color: var(--primary); }
+    .lc-stat-icon.green { background: var(--green-bg); color: var(--green); }
+    .lc-stat-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .lc-stat-icon.yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .lc-stat-icon.red { background: var(--red-bg); color: var(--red); }
+
+    .lc-stat-info { flex: 1; min-width: 0; }
+
+    .lc-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+    }
+
+    .lc-stat-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    /* ── Quick actions grid ── */
+    .lc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+        .lc-grid { grid-template-columns: 1fr; }
+    }
+
+    .lc-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .lc-card-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .lc-card-header h3 {
+        font-size: 0.775rem;
+        font-weight: 600;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .lc-card-header a {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--primary) !important;
+        text-decoration: none !important;
+    }
+
+    .lc-card-header a:hover { text-decoration: underline !important; }
+
+    .lc-card-body {
+        padding: 0;
+    }
+
+    .lc-card-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .lc-card-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 0.825rem;
+        transition: background 0.1s;
+    }
+
+    .lc-card-list li:last-child { border-bottom: none; }
+    .lc-card-list li:hover { background: var(--hover); }
+
+    .lc-card-list li a {
+        color: var(--text) !important;
+        text-decoration: none !important;
+        font-weight: 500;
+    }
+
+    .lc-card-list li a:hover { color: var(--primary) !important; }
+
+    .lc-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 99px;
+    }
+
+    .lc-badge.green { background: var(--green-bg); color: var(--green); }
+    .lc-badge.blue { background: var(--blue-bg); color: var(--blue); }
+    .lc-badge.purple { background: var(--accent-light); color: var(--primary); }
+
+    .lc-empty {
+        padding: 24px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.825rem;
+    }
+
+    /* ── Quick add buttons ── */
+    .lc-quick-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .lc-quick-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--primary) !important;
+        background: var(--accent-light);
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        text-decoration: none !important;
+        transition: all 0.15s;
+    }
+
+    .lc-quick-btn:hover {
+        background: var(--primary);
+        color: white !important;
+    }
+
+    .lc-quick-btn svg { width: 14px; height: 14px; }
+</style>
+
+<div id="lc-dashboard">
+    <h1 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:20px;">Dashboard</h1>
+
+    <!-- Stats loaded via JS -->
+    <div class="lc-stats" id="lc-stats">
+        <div class="lc-stat-card" style="opacity:0.5">
+            <div class="lc-stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+            <div class="lc-stat-info"><div class="lc-stat-value">...</div><div class="lc-stat-label">Loading</div></div>
+        </div>
+    </div>
+
+    <!-- Quick add -->
+    <div class="lc-quick-actions">
+        <a class="lc-quick-btn" href="{% url 'admin:core_group_add' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Group
+        </a>
+        <a class="lc-quick-btn" href="{% url 'admin:core_user_add' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add User
+        </a>
+        <a class="lc-quick-btn" href="{% url 'admin:core_lesson_add' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Lesson
+        </a>
+        <a class="lc-quick-btn" href="{% url 'admin:core_problem_add' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Problem
+        </a>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="lc-grid" id="lc-grid">
+        <!-- Top users -->
+        <div class="lc-card">
+            <div class="lc-card-header">
+                <h3>Top Users</h3>
+                <a href="{% url 'admin:core_user_changelist' %}">View all</a>
+            </div>
+            <div class="lc-card-body">
+                <ul class="lc-card-list" id="lc-top-users">
+                    <li class="lc-empty">Loading...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Recent solutions -->
+        <div class="lc-card">
+            <div class="lc-card-header">
+                <h3>Recent Solutions</h3>
+                <a href="{% url 'admin:core_solvedproblem_changelist' %}">View all</a>
+            </div>
+            <div class="lc-card-body">
+                <ul class="lc-card-list" id="lc-recent">
+                    <li class="lc-empty">Loading...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Groups -->
+        <div class="lc-card">
+            <div class="lc-card-header">
+                <h3>Groups</h3>
+                <a href="{% url 'admin:core_group_changelist' %}">View all</a>
+            </div>
+            <div class="lc-card-body">
+                <ul class="lc-card-list" id="lc-groups">
+                    <li class="lc-empty">Loading...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Lessons -->
+        <div class="lc-card">
+            <div class="lc-card-header">
+                <h3>Lessons</h3>
+                <a href="{% url 'admin:core_lesson_changelist' %}">View all</a>
+            </div>
+            <div class="lc-card-body">
+                <ul class="lc-card-list" id="lc-lessons">
+                    <li class="lc-empty">Loading...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+fetch('{% url "admin_dashboard_stats" %}')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        // Stats cards
+        var sh = '';
+        sh += '<a class="lc-stat-card" href="{% url "admin:core_group_changelist" %}">';
+        sh += '<div class="lc-stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg></div>';
+        sh += '<div class="lc-stat-info"><div class="lc-stat-value">' + d.groups + '</div><div class="lc-stat-label">Groups</div></div></a>';
+
+        sh += '<a class="lc-stat-card" href="{% url "admin:core_user_changelist" %}">';
+        sh += '<div class="lc-stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+        sh += '<div class="lc-stat-info"><div class="lc-stat-value">' + d.users + '</div><div class="lc-stat-label">Users</div></div></a>';
+
+        sh += '<a class="lc-stat-card" href="{% url "admin:core_lesson_changelist" %}">';
+        sh += '<div class="lc-stat-icon yellow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></div>';
+        sh += '<div class="lc-stat-info"><div class="lc-stat-value">' + d.lessons + '</div><div class="lc-stat-label">Lessons</div></div></a>';
+
+        sh += '<a class="lc-stat-card" href="{% url "admin:core_problem_changelist" %}">';
+        sh += '<div class="lc-stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>';
+        sh += '<div class="lc-stat-info"><div class="lc-stat-value">' + d.problems + '</div><div class="lc-stat-label">Problems</div></div></a>';
+
+        sh += '<a class="lc-stat-card" href="{% url "admin:core_solvedproblem_changelist" %}">';
+        sh += '<div class="lc-stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>';
+        sh += '<div class="lc-stat-info"><div class="lc-stat-value">' + d.solutions + '</div><div class="lc-stat-label">Solutions</div></div></a>';
+
+        document.getElementById('lc-stats').innerHTML = sh;
+
+        // Top users
+        var uh = '';
+        if (d.top_users.length === 0) {
+            uh = '<li class="lc-empty">No users yet</li>';
+        } else {
+            d.top_users.forEach(function(u, i) {
+                uh += '<li><a href="' + u.url + '">' + (i+1) + '. ' + u.name + '</a><span class="lc-badge green">' + u.solved + ' solved</span></li>';
+            });
+        }
+        document.getElementById('lc-top-users').innerHTML = uh;
+
+        // Recent
+        var rh = '';
+        if (d.recent.length === 0) {
+            rh = '<li class="lc-empty">No solutions yet</li>';
+        } else {
+            d.recent.forEach(function(s) {
+                rh += '<li><div><a href="' + s.user_url + '">' + s.user + '</a> <span style="color:var(--text-muted)">solved</span> <a href="' + s.problem_url + '">' + s.problem + '</a></div><span class="lc-badge blue">' + s.date + '</span></li>';
+            });
+        }
+        document.getElementById('lc-recent').innerHTML = rh;
+
+        // Groups
+        var gh = '';
+        if (d.group_list.length === 0) {
+            gh = '<li class="lc-empty">No groups yet</li>';
+        } else {
+            d.group_list.forEach(function(g) {
+                gh += '<li><a href="' + g.url + '">' + g.name + '</a><span class="lc-badge purple">' + g.users + ' users</span></li>';
+            });
+        }
+        document.getElementById('lc-groups').innerHTML = gh;
+
+        // Lessons
+        var lh = '';
+        if (d.lesson_list.length === 0) {
+            lh = '<li class="lc-empty">No lessons yet</li>';
+        } else {
+            d.lesson_list.forEach(function(l) {
+                lh += '<li><a href="' + l.url + '">' + l.title + '</a><span class="lc-badge purple">' + l.problems + ' problems</span></li>';
+            });
+        }
+        document.getElementById('lc-lessons').innerHTML = lh;
+    })
+    .catch(function(e) {
+        console.error('Dashboard stats error:', e);
+    });
+</script>
+{% endblock %}
