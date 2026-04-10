@@ -357,7 +357,7 @@
             {% endfor %}
         </div>
         <div class="filter-row">
-            <span class="filter-label">Lesson</span>
+            <span class="filter-label">Week</span>
             <a href="?{% if selected_group %}group={{ selected_group }}{% endif %}" class="pill {% if not selected_lesson %}active{% endif %}">All</a>
             {% for l in lessons %}
                 <a href="?{% if selected_group %}group={{ selected_group }}&{% endif %}lesson={{ l.id }}" class="pill {% if l.id|stringformat:'s' == selected_lesson %}active{% endif %}">{{ l.title }}</a>
